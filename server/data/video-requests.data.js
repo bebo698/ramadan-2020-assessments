@@ -6,16 +6,15 @@ module.exports = {
     return newRequest.save();
   },
 
-  getAllVideoRequests: (top) => {
+  getAllVideoRequests: (top) => { 
     return VideoRequest.find({}).sort({ submit_date: '-1' }).limit(top);
   },
 
   searchRequests: (topic) => {
-    return VideoRequest.find({ topic_title: topic })
+    return VideoRequest.find({ topic_title: { $regex: topic , $options: 'i'}})
       .sort({ addedAt: '-1' })
-      .limit(top);
-  },
-
+   },
+ 
   getRequestById: (id) => {
     return VideoRequest.findById({ _id: id });
   },

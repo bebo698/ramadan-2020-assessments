@@ -1,5 +1,5 @@
 const listofvideoElm = document.getElementById('listofrequests');
-
+ let  sort_by = 'newFirst';
 function getSingleVideoReq(vidInfo,isprepend=false) {
 
 
@@ -67,9 +67,9 @@ function getSingleVideoReq(vidInfo,isprepend=false) {
       });
   });
 }
-function loadAllreqs(sort_by = 'newFirst') 
+function loadAllreqs(sort_by = 'newFirst',searchTerm='') 
 {
-  fetch(`http://localhost:7777/video-request?sort_by=${sort_by}`).then((blob) => blob.json()).then(data => {
+  fetch(`http://localhost:7777/video-request?sort_by=${sort_by}&searchTerm=${searchTerm}`).then((blob) => blob.json()).then(data => {
     listofvideoElm.innerHTML='';
   data?.forEach(vidInfo => {
 
@@ -78,20 +78,30 @@ function loadAllreqs(sort_by = 'newFirst')
 });
 
 }
+// طول ما انا بكتب خلال الفترة الزمنية دى يفضل ميبعتش البيانات لحاجة 
+function debounce (fn,time ){
+  let timeout
+  return function (... args){
+    clearTimeout(timeout)
+    timeout = setTimeout(()=>fn.apply(this,args),time);
+  }
+
+}
 document.addEventListener('DOMContentLoaded', function () {
   const formVideoReq = document.getElementById('formVideoReq');
    
   const sortbtelms = document.querySelectorAll ('[id*=sort_by_]');
+  const searchboxelm = document.getElementById ('search_box');
   // console.log(sortbtelms);
   loadAllreqs() 
 
   sortbtelms.forEach(elm => {
     elm.addEventListener('click',function (e){
       e.preventDefault();
-      const sort_by = this.querySelector('input');
-       loadAllreqs(sort_by.value) ;
+      const sort_by = this.querySelector('input').value;
+       loadAllreqs(sort_by) ;
       this.classList.add('active');
-      if (sort_by.value==='topvotedfirst')
+      if (sort_by ==='topvotedfirst')
       {
         document.getElementById('sort_by_new').classList.remove('active')
       }else{
@@ -102,8 +112,12 @@ document.addEventListener('DOMContentLoaded', function () {
      })
    
   })
-  
 
+  
+  searchboxelm.addEventListener('input',debounce((e) => {
+    const searchTerm = e.target.value;
+    loadAllreqs (sort_by,searchTerm);
+  },300));
   formVideoReq.addEventListener('submit', (e) => {
     e.preventDefault();
     const formdata = new FormData(formVideoReq); 
